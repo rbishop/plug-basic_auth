@@ -38,9 +38,15 @@ defmodule PlugBasicAuth do
                            halt:            1]
 
   def init(opts) do
-    username = Keyword.fetch!(opts, :username)
-    password = Keyword.fetch!(opts, :password)
-    username <> ":" <> password
+    case Keyword.fetch(opts, :repository) do
+      {:ok, :htpasswd} ->
+        file = Keyword.fetch!(opts, :file)
+        {&Apache.Htpasswd.check/2, [file]}
+      _ ->
+        username = Keyword.fetch!(opts, :username)
+        password = Keyword.fetch!(opts, :password)
+        username <> ":" <> password
+    end
   end
 
   def call(conn, server_creds) do
@@ -63,6 +69,14 @@ defmodule PlugBasicAuth do
 
   defp check_creds({conn, decoded_creds}, server_creds) when decoded_creds == server_creds do
     conn
+  end
+  defp check_creds({conn, decoded_creds},  {mfa, args}) 
+  when is_function(mfa) and is_list(args) do
+    if apply(mfa, [decoded_creds | args]) do
+      conn
+    else
+      respond_with_login(conn)
+    end
   end
   defp check_creds({conn, _}, _), do: respond_with_login(conn)
 
