@@ -37,7 +37,8 @@ defmodule PlugBasicAuth do
                            send_resp:       3,
                            halt:            1]
 
-  def init(opts) do
+  def init(authfn: { fun, arg_list }), do: { fun, arg_list }
+  def init(opts) do 
     username = Keyword.fetch!(opts, :username)
     password = Keyword.fetch!(opts, :password)
     username <> ":" <> password
@@ -63,6 +64,13 @@ defmodule PlugBasicAuth do
 
   defp check_creds({conn, decoded_creds}, server_creds) when decoded_creds == server_creds do
     conn
+  end
+  defp check_creds({conn, decoded_creds}, {authfn, args}) do
+    if apply(authfn, [decoded_creds | args]) do
+      conn
+    else
+      respond_with_login(conn)
+    end
   end
   defp check_creds({conn, _}, _), do: respond_with_login(conn)
 
