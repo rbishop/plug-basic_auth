@@ -94,7 +94,7 @@ defmodule PlugBasicAuth do
 
   defp handle_auth_setup_from_method(method, _username, _password) do
     {username, password} = method.()
-    username <> ":" <> password
+    handle_auth_setup_from_method(nil, username, password)
   end
 
   defp get_auth_header(conn) do
