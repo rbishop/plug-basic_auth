@@ -93,8 +93,11 @@ defmodule PlugBasicAuth do
   end
 
   defp handle_auth_setup_from_method(method, _username, _password) do
-    {username, password} = method.()
-    handle_auth_setup_from_method(nil, username, password)
+    case method.() do
+      {username, password} ->
+      handle_auth_setup_from_method(nil, username, password)
+      _ -> "invalid_creds"
+    end
   end
 
   defp get_auth_header(conn) do
