@@ -77,6 +77,7 @@ If you wish to pull the username and password from outside your code, ie, S3, yo
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+=======
 ## License
 
 PlugBasicAuth uses the same license as Plug and the Elixir programming language. See the [license file](https://raw.githubusercontent.com/rbishop/plug_basic_auth/master/LICENSE) for more information.
