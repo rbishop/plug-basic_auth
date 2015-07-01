@@ -69,9 +69,8 @@ defmodule PlugBasicAuth do
   def init(opts) do
     username = Keyword.get(opts, :username)
     password = Keyword.get(opts, :password)
-    username_password = username <> ":" <> password
     Keyword.get(opts, :setup)
-    |> handle_auth_setup_from_method(username_password)
+    |> handle_auth_setup_from_method(username, password)
   end
 
   def call(conn, server_creds) do
@@ -81,11 +80,19 @@ defmodule PlugBasicAuth do
     |> check_creds(server_creds)
   end
 
-  defp handle_auth_setup_from_method(nil, username_password) do
-    username_password
+  defp handle_auth_setup_from_method(nil, nil, _password) do
+    "invalid_creds"
   end
 
-  defp handle_auth_setup_from_method(method, _username_password) do
+  defp handle_auth_setup_from_method(nil, _username, nil) do
+    "invalid_creds"
+  end
+
+  defp handle_auth_setup_from_method(nil, username, password) do
+    username <> ":" <> password
+  end
+
+  defp handle_auth_setup_from_method(method, _username, _password) do
     {username, password} = method.()
     username <> ":" <> password
   end
